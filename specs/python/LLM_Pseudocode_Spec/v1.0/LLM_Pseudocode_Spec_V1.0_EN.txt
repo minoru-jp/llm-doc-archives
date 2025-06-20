@@ -1,0 +1,90 @@
+LLM Prompt Embedding Format for Python Pseudocode V1.0
+
+Purpose
+    This specification defines rules for embedding LLM prompts structurally within Python code.
+    * The pseudocode defined here follows Python syntax but is intended for LLM-based code generation.
+      It is not directly executable.
+
+Pseudocode Block
+    Begins with `PSEUDO CODE START` and ends with `PSEUDO CODE END`.
+
+Completion Block
+    Begins with `COMPLETION BLOCK START` and ends with `COMPLETION BLOCK END`.
+    Defines completions for placeholders used in the pseudocode.
+
+<...> Meta Information
+    Placement:
+        - After function/class/variable definitions (before `:` or at line end)
+        - Inside argument parentheses or assignment (`()` or `=`)
+        - Inside container expressions (`[]`, `for ... if ...`)
+    Examples:
+        def func() <&public>: ...
+        def func(<!var args, +define all kwargs>): ...
+        VALUE = 42 <&unchanged>
+        class ClassName <base: object>: ...
+        list_ = [<+put some goodness>]
+    Items:
+        key: value
+            Key-value pairs (strings, identifiers, or numbers without quotes)
+        &flag
+            Boolean true flag (e.g., &must)
+        !flag
+            Boolean false flag (e.g., !must)
+        +instruction
+            Instruction to LLM
+
+    - Items are comma-separated
+    - Order is irrelevant
+    - For conflicting flags, the stricter one takes priority (e.g., &must over !must)
+    - Meta blocks can span multiple lines, as long as enclosed in <...>
+    - Nested meta blocks (1 level only) are allowed for context attachment
+      Correct:   <&annotation<&args, &kwargs, &return value>>
+      Incorrect: <&annotation><&args, &kwargs>>  # Cannot use multiple meta blocks in sequence
+      Incorrect: <&annotation<&args<&nested>>>>  # Nesting more than 1 level is not allowed
+
+    A meta block directly below `PSEUDO CODE START` is interpreted as a global fallback prompt
+    with the lowest priority.
+
+IDs
+    All IDs must appear inside some block.
+    If outside pseudocode, the ID is assumed to be a completion definition for referencing.
+    Example:
+        pseudo code
+            %@FOO%
+        FOO
+            some instruction or source
+    Completions are typically placed at the end of the file or in a separate section.
+
+Code Ranges
+    ::ID: description <...>::
+    python code
+    ::end of ID::
+    Marks actual code regions within pseudocode and assigns meta information.
+    ID: is optional.
+
+Blocks
+    All blocks can have meta information, enclosed in <...>.
+
+    %...% Replacement Block
+        %ID: description <...>%
+        Replaced by the content of the completion block with the same ID.
+        If not defined, the block remains unchanged.
+        ID: is required.
+
+    $...$ Definition Block
+       A block that groups definitions by label to enable later identification and reference.
+        Scoped Definitions:
+            ICID: +|- + ID
+                Controls visibility with assigned meta info
+                +: <&public, !prefix>
+                -: <!public, prefix: _>
+        $ICID: define (LABEL) <...>$
+        ICID: is optional.
+        (LABEL) is a label for grouped symbols, referenceable via <+put all TAG>
+        Example:
+            $+DEF_PUB: (PUBF) define all public functions<>$
+            ...
+            all_public = [<+put all PUBF name, &must, &name, &str, !value>]
+
+Note
+    Completion block specifications will be detailed in the next version.
