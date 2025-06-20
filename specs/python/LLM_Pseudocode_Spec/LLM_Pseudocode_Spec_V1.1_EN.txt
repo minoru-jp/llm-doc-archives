@@ -1,0 +1,85 @@
+LLM Prompt Embedding: Python Pseudocode Description Specification V1.1
+
+Purpose
+    This specification defines the description rules for structurally embedding prompts for LLMs within Python code.
+    * The pseudocode defined in this specification conforms to Python syntax,
+      but is intended for code generation by LLMs and is not directly executable.
+
+Start and End of Pseudocode
+    The pseudocode spans from `PSEUDO CODE START` to `PSEUDO CODE END`.
+
+<...> -> Meta Information
+    Positional Interpretation:
+        <...> can be placed anywhere.
+        - The reflection point for prompts is generally determined by Python structure.
+        - Typical placements include the beginning of function/class blocks, inside signatures (declaration/call),
+          inside context expressions, directly in right-hand values, and between a signature and its colon.
+        - Later appearing prompts take precedence.
+        - However, if a specific placement is defined elsewhere, it takes priority.
+    Items:
+        key: value:
+            Key-value data.
+            - Values can be strings, identifiers, or numbers. Quoting is unnecessary.
+        &piyo:
+            True flag (e.g., &must → mandatory)
+        !piyo:
+            False flag (e.g., !must → optional)
+        +piyo:
+            Instruction to AI
+            Semantically/structurally related identifiers, ranges, definitions, etc.
+
+    - Items are comma-separated.
+    - Order is irrelevant.
+    - When the same flag is repeated, the stricter one takes precedence (e.g., &must, !must → &must wins).
+    - <...> meta blocks can span multiple lines.
+      As long as the block is enclosed within < and >, newlines inside are allowed.
+
+    Meta blocks can nest directly after items, indicating association with that item.
+    Only one nesting level is allowed; deeper levels are ignored.
+    Valid: <&annotation<&args, &kwargs, &return value>>
+    Invalid: <&annotation><&args, &kwargs>>   # Two consecutive meta blocks → Not allowed
+    Invalid: <&annotation<&args<&nested>>>>   # Two levels of nesting → Not allowed (only one permitted)
+
+identifier:
+    Identifiers used for reference across different locations.
+    Definitions are made inside each block.
+    - BLOCKID:
+        Block identifier. Optional.
+    - MEMBER:
+        - Used when a block may contain multiple elements,
+          referring abstractly to one of them.
+          Example: all_public = [<+put all MEMBER name, &must, &name, &str, !value>]
+        - Identifiers enclosed in parentheses at the declaration site within a block are recognized as MEMBERs.
+        - Any number of MEMBERs may be defined.
+        - Meta info can be given as (MEMBER<...>)
+
+Blocks:
+    ::...:: ... ::endof BLOCKID:: → Range Block
+        Structure:
+            ::BLOCKID: start (MEMBER) <...>::
+            ...
+            ::end BLOCKID::
+        - Specifies the Python code range and attaches meta info.
+        - ID is optional.
+        - Each block may include meta info (must be inside <...>).
+        - MEMBER can only be declared in the start tag.
+        - Even if parentheses (...) appear within the body between the start and end of the block,
+          they are not recognized as MEMBERs.
+          Only identifiers enclosed in parentheses in the start tag are considered MEMBERs.
+
+    $...$ → Definition Block
+        For labeling and defining blocks for future reference.
+        Structure:
+            $BLOCKID: define (MEMBER) <...>$
+        - BLOCKID is optional.
+
+Changes from v1.0:
+    - Removed Replacement Blocks
+    - Removed Completion Blocks
+    - Expanded real-code range designation into general-purpose range blocks
+    - Revised ID definition accordingly
+    - Removed ICID
+    - Renamed ID to identifier
+    - Added classification to identifier (BLOCKID, MEMBER)
+    - Changed rules for meta info placement
+    - Simplified redundant expressions
