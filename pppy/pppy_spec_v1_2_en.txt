@@ -1,0 +1,79 @@
+LLM Prompt Embedding Specification for Python Pseudocode V1.2
+
+Purpose
+    This specification defines the notation rules for structurally embedding prompts for LLMs within Python code.
+    *Note: The pseudocode defined by this specification conforms to Python syntax, but is intended for LLM-based code generation and is not directly executable.*
+
+Start and End of Pseudocode
+    The pseudocode is defined between `PSEUDO CODE START` and `PSEUDO CODE END`.
+
+<...> → Prompt
+    Positional Interpretation:
+        <...> can be placed anywhere.
+        - Its placement reflects the prompt position according to Python structure:
+        - Beginning of a function or class block
+        - Inside a signature (declaration/call)
+        - In context expressions
+        - Immediately after a right-hand value
+        - Between a signature and the colon
+        - If <...> appears where an identifier is expected, it is interpreted as a replacement prompt for the name.
+        - The later prompt takes precedence if multiple appear.
+        - However, if specific placement is defined elsewhere, that definition takes priority.
+    Tokens
+        key: value:
+            Key-value tokens
+            - Values can be strings, identifiers, or numbers; no quotes needed.
+        &piyo:
+            Boolean true flag (e.g., &must: means "must be present")
+        !piyo:
+            Boolean false flag (e.g., !must: means "optional")
+        piyo:
+            Plain token
+            - Hints in natural language or word-based format
+
+    - Tokens are comma-separated
+    - Order of tokens has no meaning
+    - If flags of the same kind conflict, the stricter one takes precedence (&must, !must → &must)
+    - Prompt blocks can span multiple lines, as long as they are enclosed in < and >
+    - Prompt blocks can be nested under tokens to give more details
+        - Only one level of nesting is allowed
+        - If multiple prompt blocks follow consecutively, only the last is used
+        - Valid: <&annotation<&args, &kwargs, &return value>>
+        - Invalid: <&annotation><&args, &kwargs>> (consecutive blocks)
+        - Invalid: <&annotation<&args<&nested>>>> (nested more than one level)
+
+Identifier:
+    Used to reference other parts
+    Defined inside each block
+    - BLOCKID:
+        Optional block identifier
+    - MEMBER:
+        Abstract identifiers for elements within a block (e.g., all_public = [<put all MEMBER name, &must, &name, &str, !value>])
+        - Identifiers inside () within a block are treated as MEMBER
+        - Multiple MEMBERS can be defined
+        - Prompts can be applied to a MEMBER as (MEMBER<...>)
+
+Blocks:
+    ::...:: ... ::endof BLOCKID:: → Range block
+        Format:
+            ::BLOCKID: start (MEMBER) <...>::
+            ...
+            ::end BLOCKID::
+        - ID: is optional
+        - Each block can include a prompt in <...>
+        - MEMBER can only be declared in the start tag
+        - Parentheses () within the content between start and end do not define MEMBERS
+
+    $...$ → Definition block
+        For grouping definitions for later reference
+        Format:
+            $BLOCKID: define (MEMBER) <...>$
+        - BLOCKID: is optional
+
+Changes from v1.1:
+    - Renamed "meta information" to "prompt"
+    - Renamed "item" to "token"
+    - Removed + prefix from prompts
+    - Added interpretation of prompts as "replacement elements"
+    - Revised related descriptions
+    - Updated range block explanations
